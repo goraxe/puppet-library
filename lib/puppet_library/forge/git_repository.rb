@@ -58,7 +58,14 @@ module PuppetLibrary::Forge
         # * <tt>:version_tag_regex</tt> - A regex that describes which tags to serve
         def initialize(git, version_tag_regex)
             super(self)
+	    if version_tag_regex.type == Hash then
+		version_tag_regex = Regexp.new(version_tag_regex['include_tags'])
+	    end 
             @version_tag_regex = version_tag_regex
+	    if git.type == Hash then
+		cache_dir = PuppetLibrary::Util::TempDir.new("git-repo-cache")
+		git = PuppetLibrary::Util::Git.new(git['source'], cache_dir)
+	    end
             @git = git
             @modulefile_cache = PuppetLibrary::Http::Cache::InMemory.new(60)
             @tags_cache = PuppetLibrary::Http::Cache::InMemory.new(60)
